@@ -79,10 +79,10 @@ inputs:
       is_sensitive: true
 
   - jira_organization_url:
-  opts:
-    title: "Jira Organization URL"
-    summary: ira Organization URL.
-    is_required: true
+    opts:
+      title: "Jira Organization URL"
+      summary: ira Organization URL.
+      is_required: true
 
   - build_number:
     opts:
