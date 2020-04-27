@@ -78,7 +78,6 @@ func main() {
 	encodedParams := &url.URL{Path: "jql=project=RTIOS AND cf[" + needsID + "]=Build AND cf[" + branchID + "]~" + os.Getenv("BITRISE_GIT_BRANCH")}
 	encodedString := encodedParams.String()
 	encodedURL := jiraURL + "/rest/api/3/search?" + encodedString
-	fmt.Printf("URL: %v\n", encodedURL)
 	req, err := newRequest("GET", encodedURL, nil)
 	if err != nil {
 		fmt.Printf("Error setting up jira issue request:%v\n", err)
@@ -149,10 +148,6 @@ func main() {
 
 	if len(issues) > 0 {
 		fmt.Printf("Issues found:%v\n", issues)
-
-	} else {
-		fmt.Println("No issues found!")
-
 		// Parse json issue keys
 		for _, issue := range issues {
 			if len(transitionJSON) > 0 {
@@ -189,6 +184,8 @@ func main() {
 			}
 			defer resp.Body.Close()
 		}
+	} else {
+		fmt.Println("No issues found!")
 	}
 
 	os.Exit(0)
