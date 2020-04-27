@@ -8,7 +8,7 @@ Creates release notes and stores them in an environment variable.  Updates issue
 
 ## How to use this Step
 
-This will need to be added to you bitrise.yml file in direct git clone fashion.
+This will need to be added to your bitrise.yml file in `direct git clone` fashion.
 
 Ex. 
 ```
