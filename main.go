@@ -231,6 +231,7 @@ func main() {
 			fmt.Printf("versionNumber:%v\n", versionNumber)
 			fmt.Printf("buildNumber:%v\n", buildNumber)
 			fmt.Printf(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
+			fmt.Printf("buildNumber:%v\n", buildNumber)
 
 			commentJSONString := []byte(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", usernameTags, versionNumber, buildNumber))
 			
