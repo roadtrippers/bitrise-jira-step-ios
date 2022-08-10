@@ -118,10 +118,19 @@ func main() {
 		allLabelsJson = "\"labels\": [" + strings.Join(allLabels[:], ",") + "],"
 	}
 
+	// Jira has a multiple issues open where the search does not work correctly when using dashes and underscores
+	// We will replace those characters with spcaes which forces the search to the the AND operator
+	bitriseBranch := os.Getenv("BITRISE_GIT_BRANCH")
+	fmt.Printf("Branch before %v\n", bitriseBranch)
+	bitriseBranch = strings.ReplaceAll(bitriseBranch, "-", " ")
+	bitriseBranch = strings.ReplaceAll(bitriseBranch, "_", " ")
+	fmt.Printf("Branch after %v\n", bitriseBranch)
+
 	// Request Jira issues
-	encodedParams := &url.URL{Path: "jql=project=" + projectID + " AND labels in (" + searchLabels + ") AND cf[" + branchID + "]~" + os.Getenv("BITRISE_GIT_BRANCH")}
+	encodedParams := &url.URL{Path: "jql=project=" + projectID + " AND labels in (" + searchLabels + ") AND cf[" + branchID + "]~" + bitriseBranch}
 	encodedString := encodedParams.String()
 	encodedURL := jiraURL + "/rest/api/3/search?" + encodedString
+	fmt.Printf("encodedURL: %v\n", encodedURL)
 	req, err := newRequest("GET", encodedURL, nil)
 	if err != nil {
 		fmt.Printf("Error setting up jira issue request:%v\n", err)
