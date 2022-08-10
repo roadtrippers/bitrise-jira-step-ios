@@ -119,11 +119,11 @@ func main() {
 	}
 
 	// Jira has a multiple issues open where the search does not work correctly when using dashes and underscores
-	// We will replace those characters with spcaes which forces the search to the the AND operator
+	// We will replace those characters with & so that it runs an AND operation on the text strings
 	bitriseBranch := os.Getenv("BITRISE_GIT_BRANCH")
 	fmt.Printf("Branch before %v\n", bitriseBranch)
-	bitriseBranch = strings.ReplaceAll(bitriseBranch, "-", " ")
-	bitriseBranch = strings.ReplaceAll(bitriseBranch, "_", " ")
+	bitriseBranch = strings.ReplaceAll(bitriseBranch, "-", "&")
+	bitriseBranch = strings.ReplaceAll(bitriseBranch, "_", "&")
 	fmt.Printf("Branch after %v\n", bitriseBranch)
 
 	// Request Jira issues
