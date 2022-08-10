@@ -89,7 +89,7 @@ func main() {
 	fmt.Printf("Using Search Labels: %v\n", searchLabels)
 
 	jiraLabelsToRemove := os.Getenv("jira_labels_to_remove")
-	removeLabelsJson []string
+	var removeLabelsJson []string
 	if len(jiraLabelsToRemove) > 0 {
 		jiraRemoveLabelsSlice := strings.Split(jiraLabelsToRemove, ",")
 		for _, removeLabel := range jiraRemoveLabelsSlice {
@@ -101,7 +101,7 @@ func main() {
 	}
 
 	jiraLabelsToAdd := os.Getenv("jira_labels_to_add")
-	addLabelsJson []string
+	var addLabelsJson []string
 	if len(jiraLabelsToAdd) > 0 {
 		jiraAddLabelsSlice := strings.Split(jiraLabelsToAdd, ",")
 		for _, addLabel := range jiraAddLabelsSlice {
