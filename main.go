@@ -229,9 +229,9 @@ func main() {
 			fmt.Printf("usernameTags:%v\n", usernameTags)
 			fmt.Printf("versionNumber:%v\n", versionNumber)
 			fmt.Printf("buildNumber:%v\n", buildNumber)
-			fmt.Printf(fmt.Sprintf("{\"update\":{\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
+			fmt.Printf(fmt.Sprintf("{\"update\":%s{\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
 
-			commentJSONString := []byte(fmt.Sprintf("{\"update\":%s{\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
+			commentJSONString := []byte(fmt.Sprintf("{\"update\":{\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", usernameTags, versionNumber, buildNumber))
 			
 			req, err = newRequest("PUT", commentsURL, bytes.NewBuffer(commentJSONString))
 			if err != nil {
