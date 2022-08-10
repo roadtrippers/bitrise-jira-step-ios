@@ -49,7 +49,7 @@ func main() {
 	}
 
 	versionNumber := os.Getenv("version_number")
-	if len(buildNumber) == 0 {
+	if len(versionNumber) == 0 {
 		fmt.Println("Error: No version number found!")
 		os.Exit(1)
 	}
