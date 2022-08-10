@@ -93,7 +93,7 @@ func main() {
 	if len(jiraLabelsToRemove) > 0 {
 		jiraRemoveLabelsSlice := strings.Split(jiraLabelsToRemove, ",")
 		for _, removeLabel := range jiraRemoveLabelsSlice {
-			removeLabelsJson = append(removeLabelsJson, "{\"remove\": " + removeLabel + "}")
+			removeLabelsJson = append(removeLabelsJson, "{\"remove\": \"" + removeLabel + "\"}")
 		}
 		fmt.Printf("Labels to remove: %v\n", removeLabelsJson)
 	} else {
@@ -105,7 +105,7 @@ func main() {
 	if len(jiraLabelsToAdd) > 0 {
 		jiraAddLabelsSlice := strings.Split(jiraLabelsToAdd, ",")
 		for _, addLabel := range jiraAddLabelsSlice {
-			addLabelsJson = append(addLabelsJson, "{\"add\": " + addLabel + "}")
+			addLabelsJson = append(addLabelsJson, "{\"add\": \"" + addLabel + "\"}")
 		}
 		fmt.Printf("Labels to add: %v\n", addLabelsJson)
 	} else {
@@ -229,9 +229,9 @@ func main() {
 			fmt.Printf("usernameTags:%v\n", usernameTags)
 			fmt.Printf("versionNumber:%v\n", versionNumber)
 			fmt.Printf("buildNumber:%v\n", buildNumber)
-			fmt.Printf(fmt.Sprintf("{\"update\":%s{\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
+			fmt.Printf(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
 
-			commentJSONString := []byte(fmt.Sprintf("{\"update\":{\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", usernameTags, versionNumber, buildNumber))
+			commentJSONString := []byte(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", usernameTags, versionNumber, buildNumber))
 			
 			req, err = newRequest("PUT", commentsURL, bytes.NewBuffer(commentJSONString))
 			if err != nil {
