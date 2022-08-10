@@ -81,7 +81,7 @@ inputs:
   - jira_organization_url:
     opts:
       title: "Jira Organization URL"
-      summary: Jira Organization URL.
+      summary: Jira Organization URL. No trailing \
       is_required: true
       
   - version_number:
