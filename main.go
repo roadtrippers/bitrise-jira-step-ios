@@ -179,7 +179,7 @@ func main() {
 
 	fmt.Printf("Release Notes Created:%v\n", releaseNotes)
 
-	jiraUsernames := strings.Replace(os.Getenv("jira_username_list"), " ", "", -1)
+	jiraUsernames := os.Getenv("jira_username_list")//strings.Replace(os.Getenv("jira_username_list"), " ", "", -1)
 	usernameTags := ""
 	if len(jiraUsernames) > 0 {
 		jiraUsernameSlice := strings.Split(jiraUsernames, ",")
