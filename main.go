@@ -48,6 +48,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	versionNumber := os.Getenv("version_number")
+	if len(buildNumber) == 0 {
+		fmt.Println("Error: No version number found!")
+		os.Exit(1)
+	}
+
+	fmt.Printf("Using version number %v for Jira comments\n", versionNumber)
+
 	buildNumber := os.Getenv("build_number")
 	if len(buildNumber) == 0 {
 		fmt.Println("Error: No build number found!")
@@ -56,26 +64,62 @@ func main() {
 
 	fmt.Printf("Using build number %v for Jira comments\n", buildNumber)
 
+	projectID := os.Getenv("jira_project_id")
+	if len(projectID) == 0 {
+		fmt.Println("Error: No Project ID found!")
+		os.Exit(1)
+	}
+
+	fmt.Printf("Using Project ID: %v\n", projectID)
+
 	branchID := os.Getenv("jira_branch_custom_field_id")
 	if len(branchID) == 0 {
-		fmt.Println("Error: No branch ID found!")
+		fmt.Println("Error: No Branch ID found!")
 		os.Exit(1)
 	}
 
 	fmt.Printf("Using Branch ID: %v\n", branchID)
 
-	needsID := os.Getenv("jira_needs_custom_field_id")
-	needsJSON := ""
-	if len(needsID) > 0 {
-		fmt.Printf("Using Needs ID: %v\n", needsID)
-		needsJSON = ",\"customfield_" + needsID + "\":[{\"remove\":{\"value\":\"Build\"}}]"
-	} else {
-		fmt.Println("No custom field Needs ID found, updating Needs field.")
+	searchLabels := os.Getenv("jira_labels_to_search")
+	if len(searchLabels) == 0 {
+		fmt.Println("Error: No search labels found!")
 		os.Exit(1)
 	}
 
+	fmt.Printf("Using Search Labels: %v\n", searchLabels)
+
+	jiraLabelsToRemove := os.Getenv("jira_labels_to_remove")
+	removeLabelsJson []string
+	if len(jiraLabelsToRemove) > 0 {
+		jiraRemoveLabelsSlice := strings.Split(jiraLabelsToRemove, ",")
+		for _, removeLabel := range jiraRemoveLabelsSlice {
+			removeLabelsJson = append(removeLabelsJson, "{\"remove\": " + removeLabel + "}")
+		}
+		fmt.Printf("Labels to remove: %v\n", removeLabelsJson)
+	} else {
+		fmt.Println("No labels to remove found!")
+	}
+
+	jiraLabelsToAdd := os.Getenv("jira_labels_to_add")
+	addLabelsJson []string
+	if len(jiraLabelsToAdd) > 0 {
+		jiraAddLabelsSlice := strings.Split(jiraLabelsToAdd, ",")
+		for _, addLabel := range jiraAddLabelsSlice {
+			addLabelsJson = append(addLabelsJson, "{\"add\": " + addLabel + "}")
+		}
+		fmt.Printf("Labels to add: %v\n", addLabelsJson)
+	} else {
+		fmt.Println("No labels to add found!")
+	}
+
+	allLabels := append(addLabelsJson,removeLabelsJson...)
+	allLabelsJson := ""
+	if len(allLabels) > 0 {
+		allLabelsJson = "\"labels\": [" + strings.Join(allLabels[:], ",") + "],"
+	}
+
 	// Request Jira issues
-	encodedParams := &url.URL{Path: "jql=project=RTIOS AND cf[" + needsID + "]=Build AND cf[" + branchID + "]~" + os.Getenv("BITRISE_GIT_BRANCH")}
+	encodedParams := &url.URL{Path: "jql=project=" + projectID + " AND labels in (" + searchLabels + ") AND cf[" + branchID + "]~" + os.Getenv("BITRISE_GIT_BRANCH")}
 	encodedString := encodedParams.String()
 	encodedURL := jiraURL + "/rest/api/3/search?" + encodedString
 	req, err := newRequest("GET", encodedURL, nil)
@@ -170,7 +214,10 @@ func main() {
 
 			// make request to add comment and remove needs build
 			commentsURL := fmt.Sprintf("%s/rest/api/2/issue/%s", jiraURL, issue.Key)
-			commentJSONString := []byte(fmt.Sprintf("{\"update\":{\"comment\":[{\"add\":{\"body\":\"%s This will be in build %s!\"}}]%s}}", usernameTags, buildNumber, needsJSON))
+			commentJSONString := []byte(fmt.Sprintf("{\"update\":%s{\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
+
+			fmt.Printf("Using commentJSONString:%v\n", commentJSONString)
+			
 			req, err = newRequest("PUT", commentsURL, bytes.NewBuffer(commentJSONString))
 			if err != nil {
 				fmt.Printf("Error setting up jira comment request:%v\n", err)
