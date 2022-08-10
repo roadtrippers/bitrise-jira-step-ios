@@ -95,7 +95,7 @@ func main() {
 		for _, removeLabel := range jiraRemoveLabelsSlice {
 			removeLabelsJson = append(removeLabelsJson, "{\"remove\": \"" + removeLabel + "\"}")
 		}
-		fmt.Printf("Labels to remove: %v\n", removeLabelsJson)
+		fmt.Printf("Labels to remove:%v\n", removeLabelsJson)
 	} else {
 		fmt.Println("No labels to remove found!")
 	}
@@ -105,7 +105,7 @@ func main() {
 	if len(jiraLabelsToAdd) > 0 {
 		jiraAddLabelsSlice := strings.Split(jiraLabelsToAdd, ",")
 		for _, addLabel := range jiraAddLabelsSlice {
-			addLabelsJson = append(addLabelsJson, "{\"add\": \"" + addLabel + "\"}")
+			addLabelsJson = append(addLabelsJson, "{\"add\":\"" + addLabel + "\"}")
 		}
 		fmt.Printf("Labels to add: %v\n", addLabelsJson)
 	} else {
@@ -115,7 +115,7 @@ func main() {
 	allLabels := append(addLabelsJson,removeLabelsJson...)
 	allLabelsJson := ""
 	if len(allLabels) > 0 {
-		allLabelsJson = "\"labels\": [" + strings.Join(allLabels[:], ",") + "],"
+		allLabelsJson = "\"labels\":[" + strings.Join(allLabels[:], ",") + "],"
 	}
 
 	// Jira has a multiple issues open where the search does not work correctly when using dashes and underscores
@@ -131,6 +131,7 @@ func main() {
 	encodedString := encodedParams.String()
 	encodedURL := jiraURL + "/rest/api/3/search?" + encodedString
 	fmt.Printf("encodedURL: %v\n", encodedURL)
+	fmt.Printf("Branch after %v\n", bitriseBranch)
 	req, err := newRequest("GET", encodedURL, nil)
 	if err != nil {
 		fmt.Printf("Error setting up jira issue request:%v\n", err)
