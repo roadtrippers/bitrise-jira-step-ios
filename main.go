@@ -223,9 +223,14 @@ func main() {
 
 			// make request to add comment and remove needs build
 			commentsURL := fmt.Sprintf("%s/rest/api/2/issue/%s", jiraURL, issue.Key)
-			commentJSONString := []byte(fmt.Sprintf("{\"update\":%s{\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
 
-			fmt.Printf("Using commentJSONString:%v\n", commentJSONString)
+			fmt.Printf("commentsURL:%v\n", commentsURL)
+			fmt.Printf("allLabelsJson:%v\n", allLabelsJson)
+			fmt.Printf("usernameTags:%v\n", usernameTags)
+			fmt.Printf("versionNumber:%v\n", versionNumber)
+			fmt.Printf("buildNumber:%v\n", buildNumber)
+
+			commentJSONString := []byte(fmt.Sprintf("{\"update\":%s{\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
 			
 			req, err = newRequest("PUT", commentsURL, bytes.NewBuffer(commentJSONString))
 			if err != nil {
