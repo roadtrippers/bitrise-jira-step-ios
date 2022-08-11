@@ -191,7 +191,7 @@ func main() {
 		for _, usernameId := range jiraUsernameSlice {
 			userSlice := strings.Split(usernameId, ":")
 			if len(userSlice) == 2 {
-				mentionsJson = append(mentionsJson, "{\"type\":\"mention\",\"attrs\":{\"id\":\"" + userSlice[1] + "\",\"text\":\"" + userSlice[0] + "\",\"userType\":\"APP\"}}")
+				mentionsJson = append(mentionsJson, "{\"type\":\"mention\",\"attrs\":{\"id\":\"" + userSlice[1] + "\",\"text\":\"" + userSlice[0] + "\",\"userType\":\"APP\"}}") + ","
 			}
 		}
 		fmt.Printf("Users to notify:%v\n", jiraUsernames)
@@ -266,7 +266,7 @@ func main() {
 			// fmt.Printf(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
 			fmt.Printf("commentJSONString: %v\n", fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"%s This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", allMentionsJson, versionNumber, buildNumber))
 
-			commentJSONString := []byte(fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"%s This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", allMentionsJson, versionNumber, buildNumber))
+			commentJSONString := []byte(fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[%s{\"text\":\"This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", allMentionsJson, versionNumber, buildNumber))
 			// commentJSONString := []byte(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
 			
 			req, err = newRequest("POST", commentsURL, bytes.NewBuffer(commentJSONString))
