@@ -120,7 +120,7 @@ func main() {
 	allLabels := append(addLabelsJson,removeLabelsJson...)
 	allLabelsJson := ""
 	if len(allLabels) > 0 {
-		allLabelsJson = "\"labels\":[" + strings.Join(allLabels[:], ",") + "],"
+		allLabelsJson = "\"labels\":[" + strings.Join(allLabels[:], ",")
 	}
 
 	// Jira has a multiple issues open where the search does not work correctly when using dashes and underscores
@@ -238,6 +238,7 @@ func main() {
 				defer resp.Body.Close()
 			}
 
+			fmt.Printf(fmt.Sprintf("{\"update\":{%s}}", allLabelsJson))
 			labelsURL := fmt.Sprintf("%s/rest/api/2/issue/%s", jiraURL, issue.Key)
 			labelsJSONString := []byte(fmt.Sprintf("{\"update\":{%s}}", allLabelsJson))
 
@@ -265,7 +266,7 @@ func main() {
 			// fmt.Printf(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
 			fmt.Printf("commentJSONString: %v\n", fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[%s,{\"text\":\"%s This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", allMentionsJson, versionNumber, buildNumber))
 
-			commentJSONString := []byte(fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[%s,{\"text\":\"%s This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", allMentionsJson, versionNumber, buildNumber))
+			commentJSONString := []byte(fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[%s{\"text\":\"%s This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", allMentionsJson, versionNumber, buildNumber))
 			// commentJSONString := []byte(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
 			
 			req, err = newRequest("POST", commentsURL, bytes.NewBuffer(commentJSONString))
