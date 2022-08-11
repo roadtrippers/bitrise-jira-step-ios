@@ -133,7 +133,7 @@ inputs:
   - jira_username_list:
     opts:
       title: "Jira Usernames for Comments"
-      summary: Comma seperated list of Jira Usernames
+      summary: Comma seperated list of Jira Username:UserId
       is_required: false
 
   - jira_transition_id: "671"

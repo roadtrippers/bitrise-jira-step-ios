@@ -19,6 +19,11 @@ type issue struct {
 	Name string
 }
 
+type user struct {
+	Name  string
+	Identifier string
+}
+
 func newRequest(method, url string, body io.Reader) (*http.Request, error) {
 
 	username := os.Getenv("jira_username")
@@ -180,16 +185,27 @@ func main() {
 	fmt.Printf("Release Notes Created:%v\n", releaseNotes)
 
 	jiraUsernames := os.Getenv("jira_username_list")//strings.Replace(os.Getenv("jira_username_list"), " ", "", -1)
-	usernameTags := ""
+	var mentionsJson []string
 	if len(jiraUsernames) > 0 {
 		jiraUsernameSlice := strings.Split(jiraUsernames, ",")
-		for _, username := range jiraUsernameSlice {
-			usernameTags = usernameTags + "[~" + username + "]"
+		for _, usernameId := range jiraUsernameSlice {
+			userSlice := strings.Split(usernameId, ":")
+			if len(userSlice) = 2 {
+				mentionsJson = mentionsJson.append("{\"type\":\"mention\",\"attrs\":{\"id\"" + userSlice[1] + "\",\"text\":\"" + user{userSlice[0] + "\",\"userType\":\"APP\"}")
+			}
 		}
-		fmt.Printf("Usernames to notify:%v\n", usernameTags)
+		fmt.Printf("Users to notify:%v\n", jiraUsernames)
 	} else {
 		fmt.Println("No usernames found, not notifying jira users.")
 	}
+
+	allMentionsJson := ""
+	if len(mentionsJson) > 0 {
+		allMentionsJson = strings.Join(mentionsJson[:], ",") + ","
+	}
+
+	fmt.Printf("allMentionsJson: %v\n", allMentionsJson)
+	
 
 	transitionID := os.Getenv("jira_transition_id")
 	transitionJSON := ""
@@ -222,20 +238,37 @@ func main() {
 				defer resp.Body.Close()
 			}
 
+			labelsURL := fmt.Sprintf("%s/rest/api/2/issue/%s", jiraURL, issue.Key)
+			labelsJSONString := []byte(fmt.Sprintf("{\"update\":{%s}}", allLabelsJson))
+
+			req, err = newRequest("PUT", labelsURL, bytes.NewBuffer(labelsJSONString))
+			if err != nil {
+				fmt.Printf("Error setting up jira labels request:%v\n", err)
+				os.Exit(1)
+			}
+
+			resp, err = http.DefaultClient.Do(req)
+			if err != nil {
+				fmt.Printf("Error requesting jira labels update:%v\n", err)
+				os.Exit(1)
+			}
+			defer resp.Body.Close()
+
 			// make request to add comment and remove needs build
-			commentsURL := fmt.Sprintf("%s/rest/api/2/issue/%s", jiraURL, issue.Key)
+			commentsURL := fmt.Sprintf("%s/rest/api/3/issue/%s/comment", jiraURL, issue.Key)
 
-			fmt.Printf("commentsURL:%v\n", commentsURL)
-			fmt.Printf("allLabelsJson:%v\n", allLabelsJson)
-			fmt.Printf("usernameTags:%v\n", usernameTags)
-			fmt.Printf("versionNumber:%v\n", versionNumber)
-			fmt.Printf("buildNumber:%v\n", buildNumber)
-			fmt.Printf(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
-			fmt.Printf("buildNumber:%v\n", buildNumber)
+			// fmt.Printf("commentsURL:%v\n", commentsURL)
+			// fmt.Printf("allLabelsJson:%v\n", allLabelsJson)
+			// fmt.Printf("usernameTags:%v\n", usernameTags)
+			// fmt.Printf("versionNumber:%v\n", versionNumber)
+			// fmt.Printf("buildNumber:%v\n", buildNumber)
+			// fmt.Printf(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
+			fmt.Printf("commentJSONString: %v\n", fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[%s,{\"text\":\"%s This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", allMentionsJson, versionNumber, buildNumber))
 
-			commentJSONString := []byte(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
+			commentJSONString := []byte(fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[%s,{\"text\":\"%s This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", allMentionsJson, versionNumber, buildNumber))
+			// commentJSONString := []byte(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
 			
-			req, err = newRequest("PUT", commentsURL, bytes.NewBuffer(commentJSONString))
+			req, err = newRequest("POST", commentsURL, bytes.NewBuffer(commentJSONString))
 			if err != nil {
 				fmt.Printf("Error setting up jira comment request:%v\n", err)
 				os.Exit(1)
