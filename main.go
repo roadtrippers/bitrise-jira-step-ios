@@ -226,6 +226,7 @@ func main() {
 				defer resp.Body.Close()
 			}
 
+			// make request to add and remove labels
 			labelsURL := fmt.Sprintf("%s/rest/api/2/issue/%s", jiraURL, issue.Key)
 			labelsJSONString := []byte(fmt.Sprintf("{\"update\":{%s}}", allLabelsJson))
 
