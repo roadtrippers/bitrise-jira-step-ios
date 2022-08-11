@@ -185,23 +185,19 @@ func main() {
 	fmt.Printf("Release Notes Created:%v\n", releaseNotes)
 
 	jiraUsernames := os.Getenv("jira_username_list")//strings.Replace(os.Getenv("jira_username_list"), " ", "", -1)
-	var mentionsJson := ""
+	mentionsJson := ""
 	if len(jiraUsernames) > 0 {
 		jiraUsernameSlice := strings.Split(jiraUsernames, ",")
 		for _, usernameId := range jiraUsernameSlice {
 			var usernameAndId []string
 			usernameAndId = strings.Split(usernameId, ":")
 			if len(usernameAndId) == 2 {
-				mentionsJson = mentionsJson + "{\"type\":\"mention\",\"attrs\":{\"id\":\"" + usernameAndId[1] + "\",\"text\":\"" + usernameAndId[0] + "\",\"userType\":\"APP\"}}") + ","
+				mentionsJson = mentionsJson + "{\"type\":\"mention\",\"attrs\":{\"id\":\"" + usernameAndId[1] + "\",\"text\":\"" + usernameAndId[0] + "\",\"userType\":\"APP\"}},"
 			}
 		}
 		fmt.Printf("Users to notify:%v\n", jiraUsernames)
 	} else {
 		fmt.Println("No usernames found, not notifying jira users.")
-	}
-
-	if len(mentionsJson) > 0 {
-		mentionsJson = mentionsJson + ","
 	}
 
 	fmt.Printf("mentionsJson: %v\n", mentionsJson)
