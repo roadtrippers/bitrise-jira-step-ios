@@ -120,7 +120,7 @@ func main() {
 	allLabels := append(addLabelsJson,removeLabelsJson...)
 	allLabelsJson := ""
 	if len(allLabels) > 0 {
-		allLabelsJson = "\"labels\":[" + strings.Join(allLabels[:], ",")
+		allLabelsJson = "\"labels\":[" + strings.Join(allLabels[:], ",") + "]"
 	}
 
 	// Jira has a multiple issues open where the search does not work correctly when using dashes and underscores
@@ -191,7 +191,7 @@ func main() {
 		for _, usernameId := range jiraUsernameSlice {
 			userSlice := strings.Split(usernameId, ":")
 			if len(userSlice) == 2 {
-				mentionsJson = append(mentionsJson, "{\"type\":\"mention\",\"attrs\":{\"id\"" + userSlice[1] + "\",\"text\":\"" + userSlice[0] + "\",\"userType\":\"APP\"}")
+				mentionsJson = append(mentionsJson, "{\"type\":\"mention\",\"attrs\":{\"id\":\"" + userSlice[1] + "\",\"text\":\"" + userSlice[0] + "\",\"userType\":\"APP\"}}")
 			}
 		}
 		fmt.Printf("Users to notify:%v\n", jiraUsernames)
@@ -201,7 +201,7 @@ func main() {
 
 	allMentionsJson := ""
 	if len(mentionsJson) > 0 {
-		allMentionsJson = strings.Join(mentionsJson[:], ",") + ","
+		allMentionsJson = strings.Join(mentionsJson[:], ",")
 	}
 
 	fmt.Printf("allMentionsJson: %v\n", allMentionsJson)
