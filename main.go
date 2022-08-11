@@ -190,8 +190,8 @@ func main() {
 		jiraUsernameSlice := strings.Split(jiraUsernames, ",")
 		for _, usernameId := range jiraUsernameSlice {
 			userSlice := strings.Split(usernameId, ":")
-			if len(userSlice) = 2 {
-				mentionsJson = mentionsJson.append("{\"type\":\"mention\",\"attrs\":{\"id\"" + userSlice[1] + "\",\"text\":\"" + user{userSlice[0] + "\",\"userType\":\"APP\"}")
+			if len(userSlice) == 2 {
+				mentionsJson = mentionsJson.append("{\"type\":\"mention\",\"attrs\":{\"id\"" + userSlice[1] + "\",\"text\":\"" + userSlice[0] + "\",\"userType\":\"APP\"}")
 			}
 		}
 		fmt.Printf("Users to notify:%v\n", jiraUsernames)
