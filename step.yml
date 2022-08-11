@@ -102,37 +102,37 @@ inputs:
       
   - jira_project_id: "ROAD"
     opts:
-      title: "Jira Project ID to use to filter issues"
-      summary: ID of the Branch field. Ex. 15103
+      title: "Project ID"
+      summary: ID of the Project. Ex. "ROAD"
       is_required: true
   
   - jira_branch_custom_field_id: "15103"
     opts:
-      title: "Jira Custom Field ID for Branch field to use to filter issues"
+      title: "Branch field ID"
       summary: ID of the Branch field. Ex. 15103
       is_required: true
       
   - jira_labels_to_search: "needs_build"
     opts:
-      title: "Labels to use to filter issues"
+      title: "Labels to filter by"
       summary: Comma seperated list of Jira Labels
       is_required: false
   
   - jira_labels_to_remove: "needs_build"
     opts:
-      title: "Labels to remove from the Jira issues"
+      title: "Labels to remove"
       summary: Comma seperated list of Jira Labels
       is_required: false
   
   - jira_labels_to_add: "needs_qa"
     opts:
-      title: "Labels to add to the Jira issues"
+      title: "Labels to add"
       summary: Comma seperated list of Jira Labels
       is_required: false
     
   - jira_username_list:
     opts:
-      title: "Jira Usernames for Comments"
+      title: "Jira Usernames"
       summary: Comma seperated list of Jira Username:UserId
       is_required: false
 
