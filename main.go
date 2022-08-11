@@ -191,7 +191,7 @@ func main() {
 		for _, usernameId := range jiraUsernameSlice {
 			var usernameAndId []string
 			usernameAndId = strings.Split(usernameId, ":")
-			if len(user) == 2 {
+			if len(usernameAndId) == 2 {
 				mentionsJson = append(mentionsJson, "{\"type\":\"mention\",\"attrs\":{\"id\":\"" + string(usernameAndId[1]) + "\",\"text\":\"" + string(usernameAndId[0]) + "\",\"userType\":\"APP\"}}") + ","
 			}
 		}
