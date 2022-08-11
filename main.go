@@ -245,7 +245,7 @@ func main() {
 
 			// make request to add comment and mentions
 			commentsURL := fmt.Sprintf("%s/rest/api/3/issue/%s/comment", jiraURL, issue.Key)
-			commentJSONString := []byte(fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[%s{\"text\":\"This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", mentionsJson, versionNumber, buildNumber))
+			commentJSONString := []byte(fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[%s{\"text\":\" This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", mentionsJson, versionNumber, buildNumber))
 			
 			req, err = newRequest("POST", commentsURL, bytes.NewBuffer(commentJSONString))
 			if err != nil {
