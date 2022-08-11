@@ -264,9 +264,9 @@ func main() {
 			// fmt.Printf("versionNumber:%v\n", versionNumber)
 			// fmt.Printf("buildNumber:%v\n", buildNumber)
 			// fmt.Printf(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
-			fmt.Printf("commentJSONString: %v\n", fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[%s,{\"text\":\"%s This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", allMentionsJson, versionNumber, buildNumber))
+			fmt.Printf("commentJSONString: %v\n", fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"%s This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", allMentionsJson, versionNumber, buildNumber))
 
-			commentJSONString := []byte(fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[%s{\"text\":\"%s This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", allMentionsJson, versionNumber, buildNumber))
+			commentJSONString := []byte(fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"%s This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", allMentionsJson, versionNumber, buildNumber))
 			// commentJSONString := []byte(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
 			
 			req, err = newRequest("POST", commentsURL, bytes.NewBuffer(commentJSONString))
