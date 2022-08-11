@@ -185,14 +185,14 @@ func main() {
 	fmt.Printf("Release Notes Created:%v\n", releaseNotes)
 
 	jiraUsernames := os.Getenv("jira_username_list")//strings.Replace(os.Getenv("jira_username_list"), " ", "", -1)
-	var mentionsJson []string
+	var mentionsJson := ""
 	if len(jiraUsernames) > 0 {
 		jiraUsernameSlice := strings.Split(jiraUsernames, ",")
 		for _, usernameId := range jiraUsernameSlice {
 			var usernameAndId []string
 			usernameAndId = strings.Split(usernameId, ":")
 			if len(usernameAndId) == 2 {
-				mentionsJson = append(mentionsJson, "{\"type\":\"mention\",\"attrs\":{\"id\":\"" + string(usernameAndId[1]) + "\",\"text\":\"" + string(usernameAndId[0]) + "\",\"userType\":\"APP\"}}") + ","
+				mentionsJson = mentionsJson + "{\"type\":\"mention\",\"attrs\":{\"id\":\"" + usernameAndId[1] + "\",\"text\":\"" + usernameAndId[0] + "\",\"userType\":\"APP\"}}") + ","
 			}
 		}
 		fmt.Printf("Users to notify:%v\n", jiraUsernames)
@@ -200,12 +200,11 @@ func main() {
 		fmt.Println("No usernames found, not notifying jira users.")
 	}
 
-	allMentionsJson := ""
 	if len(mentionsJson) > 0 {
-		allMentionsJson = strings.Join(mentionsJson[:], ",")
+		mentionsJson = mentionsJson + ","
 	}
 
-	fmt.Printf("allMentionsJson: %v\n", allMentionsJson)
+	fmt.Printf("mentionsJson: %v\n", mentionsJson)
 	
 
 	transitionID := os.Getenv("jira_transition_id")
@@ -265,9 +264,9 @@ func main() {
 			// fmt.Printf("versionNumber:%v\n", versionNumber)
 			// fmt.Printf("buildNumber:%v\n", buildNumber)
 			// fmt.Printf(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
-			fmt.Printf("commentJSONString: %v\n", fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"%s This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", allMentionsJson, versionNumber, buildNumber))
+			fmt.Printf("commentJSONString: %v\n", fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"%s This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", mentionsJson, versionNumber, buildNumber))
 
-			commentJSONString := []byte(fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[%s{\"text\":\"This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", allMentionsJson, versionNumber, buildNumber))
+			commentJSONString := []byte(fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[%s{\"text\":\"This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", mentionsJson, versionNumber, buildNumber))
 			// commentJSONString := []byte(fmt.Sprintf("{\"update\":{%s\"comment\":[{\"add\":{\"body\":\"%s This will be in %s (%s)!\"}}]}}", allLabelsJson, usernameTags, versionNumber, buildNumber))
 			
 			req, err = newRequest("POST", commentsURL, bytes.NewBuffer(commentJSONString))
