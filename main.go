@@ -19,6 +19,11 @@ type issue struct {
 	Name string
 }
 
+type user struct {
+	Name  string
+	Identifier string
+}
+
 func newRequest(method, url string, body io.Reader) (*http.Request, error) {
 
 	username := os.Getenv("jira_username")
@@ -48,6 +53,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	versionNumber := os.Getenv("version_number")
+	if len(versionNumber) == 0 {
+		fmt.Println("Error: No version number found!")
+		os.Exit(1)
+	}
+
+	fmt.Printf("Using version number %v for Jira comments\n", versionNumber)
+
 	buildNumber := os.Getenv("build_number")
 	if len(buildNumber) == 0 {
 		fmt.Println("Error: No build number found!")
@@ -56,26 +69,68 @@ func main() {
 
 	fmt.Printf("Using build number %v for Jira comments\n", buildNumber)
 
+	projectID := os.Getenv("jira_project_id")
+	if len(projectID) == 0 {
+		fmt.Println("Error: No Project ID found!")
+		os.Exit(1)
+	}
+
+	fmt.Printf("Using Project ID: %v\n", projectID)
+
 	branchID := os.Getenv("jira_branch_custom_field_id")
 	if len(branchID) == 0 {
-		fmt.Println("Error: No branch ID found!")
+		fmt.Println("Error: No Branch ID found!")
 		os.Exit(1)
 	}
 
 	fmt.Printf("Using Branch ID: %v\n", branchID)
 
-	needsID := os.Getenv("jira_needs_custom_field_id")
-	needsJSON := ""
-	if len(needsID) > 0 {
-		fmt.Printf("Using Needs ID: %v\n", needsID)
-		needsJSON = ",\"customfield_" + needsID + "\":[{\"remove\":{\"value\":\"Build\"}}]"
-	} else {
-		fmt.Println("No custom field Needs ID found, updating Needs field.")
+	searchLabels := os.Getenv("jira_labels_to_search")
+	if len(searchLabels) == 0 {
+		fmt.Println("Error: No search labels found!")
 		os.Exit(1)
 	}
 
+	fmt.Printf("Using Search Labels: %v\n", searchLabels)
+
+	jiraLabelsToRemove := os.Getenv("jira_labels_to_remove")
+	var removeLabelsJson []string
+	if len(jiraLabelsToRemove) > 0 {
+		jiraRemoveLabelsSlice := strings.Split(jiraLabelsToRemove, ",")
+		for _, removeLabel := range jiraRemoveLabelsSlice {
+			removeLabelsJson = append(removeLabelsJson, "{\"remove\": \"" + removeLabel + "\"}")
+		}
+		fmt.Printf("Labels to remove:%v\n", removeLabelsJson)
+	} else {
+		fmt.Println("No labels to remove found!")
+	}
+
+	jiraLabelsToAdd := os.Getenv("jira_labels_to_add")
+	var addLabelsJson []string
+	if len(jiraLabelsToAdd) > 0 {
+		jiraAddLabelsSlice := strings.Split(jiraLabelsToAdd, ",")
+		for _, addLabel := range jiraAddLabelsSlice {
+			addLabelsJson = append(addLabelsJson, "{\"add\":\"" + addLabel + "\"}")
+		}
+		fmt.Printf("Labels to add: %v\n", addLabelsJson)
+	} else {
+		fmt.Println("No labels to add found!")
+	}
+
+	allLabels := append(addLabelsJson,removeLabelsJson...)
+	allLabelsJson := ""
+	if len(allLabels) > 0 {
+		allLabelsJson = "\"labels\":[" + strings.Join(allLabels[:], ",") + "]"
+	}
+
+	// Jira has multiple issues open where the search does not work correctly when using dashes and underscores
+	// We will replace those characters with & so that it runs an AND operation on the text strings
+	bitriseBranch := os.Getenv("BITRISE_GIT_BRANCH")
+	bitriseBranch = strings.ReplaceAll(bitriseBranch, "-", "&")
+	bitriseBranch = strings.ReplaceAll(bitriseBranch, "_", "&")
+
 	// Request Jira issues
-	encodedParams := &url.URL{Path: "jql=project=RTIOS AND cf[" + needsID + "]=Build AND cf[" + branchID + "]~" + os.Getenv("BITRISE_GIT_BRANCH")}
+	encodedParams := &url.URL{Path: "jql=project=" + projectID + " AND labels in (" + searchLabels + ") AND cf[" + branchID + "]~" + bitriseBranch}
 	encodedString := encodedParams.String()
 	encodedURL := jiraURL + "/rest/api/3/search?" + encodedString
 	req, err := newRequest("GET", encodedURL, nil)
@@ -125,14 +180,18 @@ func main() {
 
 	fmt.Printf("Release Notes Created:%v\n", releaseNotes)
 
-	jiraUsernames := strings.Replace(os.Getenv("jira_username_list"), " ", "", -1)
-	usernameTags := ""
+	jiraUsernames := os.Getenv("jira_username_list")
+	mentionsJson := ""
 	if len(jiraUsernames) > 0 {
 		jiraUsernameSlice := strings.Split(jiraUsernames, ",")
-		for _, username := range jiraUsernameSlice {
-			usernameTags = usernameTags + "[~" + username + "]"
+		for _, usernameId := range jiraUsernameSlice {
+			var usernameAndId []string
+			usernameAndId = strings.Split(usernameId, ":")
+			if len(usernameAndId) == 2 {
+				mentionsJson = mentionsJson + "{\"type\":\"mention\",\"attrs\":{\"id\":\"" + usernameAndId[1] + "\",\"text\":\"" + usernameAndId[0] + "\",\"userType\":\"APP\"}},"
+			}
 		}
-		fmt.Printf("Usernames to notify:%v\n", usernameTags)
+		fmt.Printf("Users to notify:%v\n", jiraUsernames)
 	} else {
 		fmt.Println("No usernames found, not notifying jira users.")
 	}
@@ -147,7 +206,6 @@ func main() {
 	}
 
 	if len(issues) > 0 {
-		fmt.Printf("Issues found:%v\n", issues)
 		// Parse json issue keys
 		for _, issue := range issues {
 			if len(transitionJSON) > 0 {
@@ -168,10 +226,28 @@ func main() {
 				defer resp.Body.Close()
 			}
 
-			// make request to add comment and remove needs build
-			commentsURL := fmt.Sprintf("%s/rest/api/2/issue/%s", jiraURL, issue.Key)
-			commentJSONString := []byte(fmt.Sprintf("{\"update\":{\"comment\":[{\"add\":{\"body\":\"%s This will be in build %s!\"}}]%s}}", usernameTags, buildNumber, needsJSON))
-			req, err = newRequest("PUT", commentsURL, bytes.NewBuffer(commentJSONString))
+			// make request to add and remove labels
+			labelsURL := fmt.Sprintf("%s/rest/api/2/issue/%s", jiraURL, issue.Key)
+			labelsJSONString := []byte(fmt.Sprintf("{\"update\":{%s}}", allLabelsJson))
+
+			req, err = newRequest("PUT", labelsURL, bytes.NewBuffer(labelsJSONString))
+			if err != nil {
+				fmt.Printf("Error setting up jira labels request:%v\n", err)
+				os.Exit(1)
+			}
+
+			resp, err = http.DefaultClient.Do(req)
+			if err != nil {
+				fmt.Printf("Error requesting jira labels update:%v\n", err)
+				os.Exit(1)
+			}
+			defer resp.Body.Close()
+
+			// make request to add comment and mentions
+			commentsURL := fmt.Sprintf("%s/rest/api/3/issue/%s/comment", jiraURL, issue.Key)
+			commentJSONString := []byte(fmt.Sprintf("{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[%s{\"text\":\" This will be in %s (%s)!\",\"type\": \"text\"}]}]}}", mentionsJson, versionNumber, buildNumber))
+			
+			req, err = newRequest("POST", commentsURL, bytes.NewBuffer(commentJSONString))
 			if err != nil {
 				fmt.Printf("Error setting up jira comment request:%v\n", err)
 				os.Exit(1)

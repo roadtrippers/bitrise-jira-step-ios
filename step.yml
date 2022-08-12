@@ -81,7 +81,15 @@ inputs:
   - jira_organization_url:
     opts:
       title: "Jira Organization URL"
-      summary: Jira Organization URL.
+      summary: Jira Organization URL. No trailing \
+      is_required: true
+      
+  - version_number:
+    opts:
+      title: "Version Number"
+      summary: The version number
+      description: |
+        The version number.
       is_required: true
 
   - build_number:
@@ -91,29 +99,47 @@ inputs:
       description: |
         The build number.
       is_required: true
-  
-  - jira_branch_custom_field_id: "10098"
+      
+  - jira_project_id: "ROAD"
     opts:
-      title: "Jira Custom Field ID for Branch field"
-      summary: ID of the Branch field. Ex. 10098
+      title: "Project ID"
+      summary: ID of the Project. Ex. "ROAD"
       is_required: true
   
-  - jira_needs_custom_field_id: "10064"
+  - jira_branch_custom_field_id: "15103"
     opts:
-      title: "Jira Custom Field ID for Needs field"
-      summary: ID of the Needs field. Ex. 10064
+      title: "Branch field ID"
+      summary: ID of the Branch field. Ex. 15103
       is_required: true
+      
+  - jira_labels_to_search: "needs_build"
+    opts:
+      title: "Labels to filter by"
+      summary: Comma seperated list of Jira Labels
+      is_required: false
+  
+  - jira_labels_to_remove: "needs_build"
+    opts:
+      title: "Labels to remove"
+      summary: Comma seperated list of Jira Labels
+      is_required: false
+  
+  - jira_labels_to_add: "needs_qa"
+    opts:
+      title: "Labels to add"
+      summary: Comma seperated list of Jira Labels
+      is_required: false
     
   - jira_username_list:
     opts:
-      title: "Jira Usernames for Comments"
-      summary: Comma seperated list of Jira Usernames
+      title: "Jira Usernames"
+      summary: Comma seperated list of Jira Username:UserId
       is_required: false
 
-  - jira_transition_id: "41"
+  - jira_transition_id: "671"
     opts:
       title: "Jira Transition ID"
-      summary: Each issue will transition to this ID. Ex. 41 = QA
+      summary: Each issue will transition to this ID. Ex. 671 = QA
       is_required: false
 
 outputs:
