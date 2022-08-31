@@ -126,11 +126,32 @@ func main() {
 	// Jira has multiple issues open where the search does not work correctly when using dashes and underscores
 	// We will replace those characters with & so that it runs an AND operation on the text strings
 	bitriseBranch := os.Getenv("BITRISE_GIT_BRANCH")
-	bitriseBranch = strings.ReplaceAll(bitriseBranch, "-", "&")
-	bitriseBranch = strings.ReplaceAll(bitriseBranch, "_", "&")
+	var branchSlice []string
+	if len(bitriseBranch) <= 0 {
+		fmt.Println("No bitrise branch!")
+	}
+
+	bitriseBranch = strings.ReplaceAll(bitriseBranch, "-", ",")
+	bitriseBranch = strings.ReplaceAll(bitriseBranch, "_", ",")
+	
+	for _, branchSubstring := range strings.Split(bitriseBranch, ",") {
+		branchSlice = append(branchSlice, "cf[" + branchID + "]~" + branchSubstring)
+	}
+
+	branchJson := strings.Join(branchSlice[:], " AND ")
+	fmt.Printf("Branch JSON: %v\n", branchJson)
+
+	componentId := os.Getenv("jira_component_id")
+	componentJson := ""
+	if len(componentId) > 0 {
+		componentJson = " AND component=" + componentId
+		fmt.Printf("Component ID: %v\n", componentId)
+	} else {
+		fmt.Println("No Component ID found")
+	}
 
 	// Request Jira issues
-	encodedParams := &url.URL{Path: "jql=project=" + projectID + " AND labels in (" + searchLabels + ") AND cf[" + branchID + "]~" + bitriseBranch}
+	encodedParams := &url.URL{Path: "jql=project=" + projectID + " AND labels in (" + searchLabels + ") AND " + branchJson + componentJson}
 	encodedString := encodedParams.String()
 	encodedURL := jiraURL + "/rest/api/3/search?" + encodedString
 	req, err := newRequest("GET", encodedURL, nil)
