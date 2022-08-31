@@ -24,6 +24,7 @@ Ex.
 - **Build Number:** The build number used for release notes.
 - **Project ID:** The project ID used to filter issues.
 - **Branch field ID:** This is the ID of the Branch field in Jira.  This is used to filter all issues to the github branch of the current build.
+- **Component field ID:** This is the ID of the Component field in Jira.  This is used to filter all issues by the component ID
 - **Labels to filter by:** A list of labels used to filter issues.  These need to be comma seperated.
 - **Labels to remove:** A list of labels to remove from transitioned issues.
 - **Labels to add:** A list of labels to add to transitioned issues.
