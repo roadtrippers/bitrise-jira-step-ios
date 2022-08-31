@@ -111,6 +111,12 @@ inputs:
       title: "Branch field ID"
       summary: ID of the Branch field. Ex. 15103
       is_required: true
+
+  - jira_component_id: "iOS"
+    opts:
+      title: "Component ID"
+      summary: Component ID. Ex. iOS
+      is_required: false
       
   - jira_labels_to_search: "needs_build"
     opts:
