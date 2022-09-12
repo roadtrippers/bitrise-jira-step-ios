@@ -125,10 +125,10 @@ func main() {
 
 	bitriseBranch := os.Getenv("BITRISE_GIT_BRANCH")
 	if len(bitriseBranch) > 0 {
-		fmt.Printf("Branch: %v\n", bitriseBranch)
-		os.Exit(1)
+		fmt.Printf("Using Branch: %v\n", bitriseBranch)
 	} else {
 		fmt.Println("No Branch found")
+		os.Exit(1)
 	}
 
 	componentId := os.Getenv("jira_component_id")
